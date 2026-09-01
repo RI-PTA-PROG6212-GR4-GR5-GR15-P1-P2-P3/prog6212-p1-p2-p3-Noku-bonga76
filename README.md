@@ -1,3 +1,4 @@
+<img width="685" height="57" alt="Screenshot 2026-09-01 104021" src="https://github.com/user-attachments/assets/e88e6828-e462-4a1e-867a-6b3743857dbf" />
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/mr-hqvA6)
 
 # RaceDay – Event Management System
