@@ -26,11 +26,11 @@ jobs:
 
       - name: Check ERD
         run: |
-          test -f docs/RaceDay_ERD.png
+          test -f docs/ERD.drawio.png
 
       - name: Check SQL Database Script
         run: |
-          test -f docs/RaceDay_Database.sql
+          test -f docs/RaceDay.sql
 
       - name: Part 1 validation successful
         run: |
