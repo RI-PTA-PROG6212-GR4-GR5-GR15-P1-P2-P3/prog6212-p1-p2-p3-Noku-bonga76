@@ -1,4 +1,3 @@
-<img width="685" height="57" alt="Screenshot 2026-09-01 104021" src="https://github.com/user-attachments/assets/e88e6828-e462-4a1e-867a-6b3743857dbf" />
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/mr-hqvA6)
 
 # RaceDay – Event Management System
@@ -9,16 +8,12 @@ RaceDay is a full-stack, web-based event management platform built for the South
 
 The platform allows **Event Organisers** to create and manage events, define categories, and capture participant results, while **Participants** can browse upcoming events, enter events, track their personal results history, and prepare for race day.
 
-This repository contains the submission for **Part 1: System Planning and Database** of the Programming 2B Portfolio of Evidence (PROG6212/w). This part focuses purely on planning — no application code is included yet. It contains the Entity Relationship Diagram (ERD), the API endpoint plan, and the SQL database creation/seed script that will be implemented in Part 2.
-
 ## User Roles
 
 RaceDay supports two distinct user roles:
 
 - **Organiser** — Can create, edit, and delete events; manage event categories; capture participant results; and view all enrolments for their events.
 - **Participant** — Can register an account, browse events, enter an event by selecting a category, view their own enrolments, and track their personal race results.
-
-Role-based access is planned at this stage and will be enforced at the API level in Part 2, then reflected in the MVC interface in Part 3.
 
 ## Repository Structure
 
@@ -46,9 +41,8 @@ README.md
 4. Execute the script against a clean/new database. It will create all tables, constraints, and seed data required for the RaceDay system.
 
 ## CI/CD
-
+<img width="685" height="57" alt="Screenshot 2026-09-01 104021" src="https://github.com/user-attachments/assets/e88e6828-e462-4a1e-867a-6b3743857dbf" />
 A GitHub Actions workflow (`.github/workflows/validate.yml`) runs on every push to verify that the `/docs` folder exists and contains the required planning files.
-
 **Build status:** SUCCESSFULL
 
 ## Video Presentation
