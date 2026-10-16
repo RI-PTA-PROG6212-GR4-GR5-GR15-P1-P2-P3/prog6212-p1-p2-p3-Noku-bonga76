@@ -96,5 +96,6 @@ The test command and path must match the actual project structure. Test results 
 
 ## Video Presentation
 
-**YouTube presentation link:** PASTE THE FINAL UNLISTED YOUTUBE URL HERE
+**YouTube presentation link:** https://youtu.be/VX6tYe2twNE 
+https://youtu.be/VX6tYe2twNE
 
