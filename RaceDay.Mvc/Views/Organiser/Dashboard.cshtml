@@ -1,0 +1,17 @@
+@model DashboardVm
+@{ ViewData["Title"] = "Dashboard"; var upcoming = Model.Events.Where(e => e.EventDate.Date >= DateTime.Today).ToList(); }
+<h2 class="rd-h">Organiser Dashboard</h2>
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="stat"><div class="num">@Model.Events.Count</div>Events created</div></div>
+  <div class="col-md-4"><div class="stat"><div class="num">@Model.Events.Sum(e => e.EnrolmentCount)</div>Total enrolments</div></div>
+  <div class="col-md-4"><div class="stat"><div class="num">@upcoming.Count</div>Upcoming events</div></div>
+</div>
+<div class="table-responsive"><table class="table rd-table align-middle">
+  <thead><tr><th>Event</th><th>Date</th><th>Type</th><th>Enrolments</th><th></th></tr></thead>
+  <tbody>
+  @foreach (var e in Model.Events) {
+    <tr><td>@e.Name</td><td>@e.EventDate.ToString("dd MMM yyyy") @if (e.EventDate.Date >= DateTime.Today) { <span class="badge bg-rd">Upcoming</span> }</td><td>@e.EventType</td><td>@e.EnrolmentCount</td>
+    <td class="text-end"><a class="btn btn-sm btn-outline-dark" asp-action="Enrolments" asp-route-id="@e.Id">Enrolments</a></td></tr>
+  }
+  @if (!Model.Events.Any()) { <tr><td colspan="5" class="text-muted">No events yet. <a asp-action="CreateEvent">Create your first event</a>.</td></tr> }
+  </tbody></table></div>

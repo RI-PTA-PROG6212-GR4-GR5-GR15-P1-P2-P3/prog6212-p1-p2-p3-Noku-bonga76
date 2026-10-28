@@ -1,0 +1,10 @@
+@model EnrolmentsVm
+@{ ViewData["Title"] = "Enrolments"; }
+<h2 class="rd-h">Enrolments - @Model.Event.Name</h2>
+<div class="table-responsive"><table class="table rd-table align-middle">
+  <thead><tr><th>Participant</th><th>Category</th><th>Status</th></tr></thead>
+  <tbody>
+  @foreach (var e in Model.Enrolments) { <tr><td>@e.ParticipantName</td><td>@e.CategoryName</td><td><partial name="_StatusBadge" model="e.Status" /></td></tr> }
+  @if (!Model.Enrolments.Any()) { <tr><td colspan="3" class="text-muted">Nobody has enrolled yet.</td></tr> }
+  </tbody></table></div>
+<a class="btn btn-link" asp-action="Events">&larr; Back</a>

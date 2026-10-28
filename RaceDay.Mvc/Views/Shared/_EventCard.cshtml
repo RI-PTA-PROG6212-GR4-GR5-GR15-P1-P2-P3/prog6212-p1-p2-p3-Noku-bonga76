@@ -1,0 +1,12 @@
+@model EventDto
+<div class="card h-100 rd-card">
+  @if (!string.IsNullOrEmpty(Model.BannerUrl)) { <img src="@Model.BannerUrl" class="card-img-top banner-sm" alt="@Model.Name banner" /> }
+  else { <div class="banner-sm banner-placeholder">@Model.EventType.ToUpper()</div> }
+  <div class="card-body">
+    <span class="badge bg-rd">@Model.EventType</span>
+    <h5 class="card-title rd-h mt-2">@Model.Name</h5>
+    <p class="mb-1">@Model.EventDate.ToString("dd MMM yyyy") &middot; @Model.Location</p>
+    <p class="text-muted">@Model.Distance km</p>
+    <a class="btn btn-rd btn-sm" asp-controller="Home" asp-action="Details" asp-route-id="@Model.Id">View &amp; Enter</a>
+  </div>
+</div>

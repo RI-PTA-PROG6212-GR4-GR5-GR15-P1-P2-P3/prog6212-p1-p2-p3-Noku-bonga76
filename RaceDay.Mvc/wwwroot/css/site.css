@@ -1,0 +1,20 @@
+:root { --rd-orange:#FF5A1F; --rd-navy:#0B1F3A; --rd-green:#1E9E5A; --rd-amber:#F2A900; --rd-red:#D64545; }
+body { font-family:'Inter',system-ui,sans-serif; background:#F5F7FA; color:#1b2633; }
+.rd-h, .rd-logo, .stat .num { font-family:'Oswald','Arial Narrow',sans-serif; letter-spacing:.5px; text-transform:uppercase; }
+.rd-nav { background:var(--rd-navy); border-bottom:4px solid var(--rd-orange); }
+.rd-logo { font-size:1.6rem; font-weight:700; color:#fff !important; } .rd-logo span { color:var(--rd-orange); }
+.btn-rd { background:var(--rd-orange); border-color:var(--rd-orange); color:#fff; font-weight:600; }
+.btn-rd:hover { background:#e04a12; border-color:#e04a12; color:#fff; }
+.bg-rd { background:var(--rd-orange) !important; }
+.rd-hero { background:linear-gradient(120deg,var(--rd-navy),#1d3c6b); color:#fff; padding:2.5rem 2rem; border-radius:12px; }
+.rd-card { border:0; box-shadow:0 2px 8px rgba(11,31,58,.12); }
+.banner-sm { width:100%; height:160px; object-fit:cover; border-radius:6px 6px 0 0; }
+.banner-lg { width:100%; max-height:320px; height:260px; object-fit:cover; border-radius:12px; }
+.banner-placeholder { display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--rd-navy),var(--rd-orange)); color:#fff; font-family:'Oswald',sans-serif; font-size:2rem; }
+.rd-table thead { background:var(--rd-navy); color:#fff; }
+.status { padding:.25rem .7rem; border-radius:999px; font-weight:600; font-size:.8rem; color:#fff; }
+.st-confirmed { background:var(--rd-green); } .st-pending { background:var(--rd-amber); color:#1b2633; } .st-cancelled { background:var(--rd-red); }
+.stat { background:#fff; border-left:6px solid var(--rd-orange); border-radius:8px; padding:1rem 1.25rem; box-shadow:0 2px 8px rgba(11,31,58,.08); }
+.stat .num { font-size:2.4rem; color:var(--rd-navy); }
+.avatar { width:120px; height:120px; border-radius:50%; object-fit:cover; border:4px solid var(--rd-orange); }
+.rd-footer { background:var(--rd-navy); color:#cfd8e6; margin-top:3rem; }
