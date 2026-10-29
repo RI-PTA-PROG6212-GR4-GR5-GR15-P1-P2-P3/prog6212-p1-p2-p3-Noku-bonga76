@@ -1,9 +1,8 @@
-
-name: RaceDay API Build and Tests
+name: RaceDay Build and Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, part3]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -21,11 +20,22 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore dependencies
-        run: dotnet restore RaceDay.API.Tests/RaceDay.API.Tests.csproj
+      # Part 2: API + unit tests
+      - name: Restore API tests
+        run: dotnet restore RaceDay.API/RaceDay.API.Tests/RaceDay.API.Tests.csproj
 
       - name: Build API and tests
-        run: dotnet build RaceDay.API.Tests/RaceDay.API.Tests.csproj --configuration Release --no-restore
+        run: dotnet build RaceDay.API/RaceDay.API.Tests/RaceDay.API.Tests.csproj --configuration Release --no-restore
 
       - name: Run automated tests
-        run: dotnet test RaceDay.API.Tests/RaceDay.API.Tests.csproj --configuration Release --no-build --logger "console;verbosity=normal"
+        run: dotnet test RaceDay.API/RaceDay.API.Tests/RaceDay.API.Tests.csproj --configuration Release --no-build --logger "console;verbosity=normal"
+
+      # Part 3: MVC app
+      - name: Restore MVC
+        run: dotnet restore RaceDay.Mvc/RaceDay.Mvc.csproj
+
+      - name: Build MVC
+        run: dotnet build RaceDay.Mvc/RaceDay.Mvc.csproj --configuration Release --no-restore
+
+      - name: Build MVC Docker image
+        run: docker build -t raceday-mvc ./RaceDay.Mvc
