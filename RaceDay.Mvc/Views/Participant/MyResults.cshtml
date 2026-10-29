@@ -1,0 +1,12 @@
+@model List<ResultDto>
+@{ ViewData["Title"] = "My Results";
+   string Ord(int n) => n + ((n % 100) is >= 11 and <= 13 ? "th" : (n % 10) switch { 1 => "st", 2 => "nd", 3 => "rd", _ => "th" }); }
+<h2 class="rd-h">My Results</h2>
+@if (!Model.Any()) { <p class="text-muted">No results yet - results appear here once organisers publish them.</p> }
+else {
+<div class="table-responsive"><table class="table rd-table align-middle">
+  <thead><tr><th>Event</th><th>Date</th><th>Category</th><th>Finish time</th><th>Position</th></tr></thead>
+  <tbody>@foreach (var r in Model) {
+    <tr><td>@r.EventName</td><td>@r.EventDate.ToString("dd MMM yyyy")</td><td>@r.CategoryName</td><td>@r.FinishTime</td>
+    <td><strong>@Ord(r.FinishingPosition)</strong> out of @r.TotalFinishers finishers</td></tr>
+  }</tbody></table></div>}

@@ -1,0 +1,11 @@
+@model List<EnrolmentDto>
+@{ ViewData["Title"] = "My Events"; }
+<h2 class="rd-h">My Events</h2>
+@if (!Model.Any()) { <p class="text-muted">You haven't entered any events yet. <a asp-controller="Home" asp-action="Index">Browse events</a></p> }
+else {
+<div class="table-responsive"><table class="table rd-table align-middle">
+  <thead><tr><th>Event</th><th>Date</th><th>Category</th><th>Status</th><th></th></tr></thead>
+  <tbody>@foreach (var e in Model) {
+    <tr><td><a asp-controller="Home" asp-action="Details" asp-route-id="@e.EventId">@e.EventName</a></td><td>@e.EventDate.ToString("dd MMM yyyy")</td><td>@e.CategoryName</td><td><partial name="_StatusBadge" model="e.Status" /></td>
+    <td class="text-end">@if (e.Status != "Cancelled" && e.EventDate.Date >= DateTime.Today) { <form asp-action="CancelEnrolment" asp-route-id="@e.Id" method="post" onsubmit="return confirm('Cancel this enrolment?');"><button class="btn btn-sm btn-outline-danger">Cancel</button></form> }</td></tr>
+  }</tbody></table></div>}

@@ -1,0 +1,22 @@
+@model EventFormVm
+@{ ViewData["Title"] = Model.Id == 0 ? "New Event" : "Edit Event"; }
+<div class="row justify-content-center"><div class="col-md-8">
+  <h2 class="rd-h">@ViewData["Title"]</h2>
+  <form asp-action="@(Model.Id == 0 ? "CreateEvent" : "EditEvent")" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
+    <div class="mb-3"><label asp-for="Description" class="form-label"></label><textarea asp-for="Description" rows="4" class="form-control"></textarea><span asp-validation-for="Description" class="text-danger"></span></div>
+    <div class="row">
+      <div class="col-md-6 mb-3"><label asp-for="EventDate" class="form-label"></label><input asp-for="EventDate" type="date" class="form-control" /><span asp-validation-for="EventDate" class="text-danger"></span></div>
+      <div class="col-md-6 mb-3"><label asp-for="Location" class="form-label"></label><input asp-for="Location" class="form-control" /><span asp-validation-for="Location" class="text-danger"></span></div>
+      <div class="col-md-6 mb-3"><label asp-for="Distance" class="form-label"></label><input asp-for="Distance" class="form-control" /><span asp-validation-for="Distance" class="text-danger"></span></div>
+      <div class="col-md-6 mb-3"><label asp-for="EventType" class="form-label"></label>
+        <select asp-for="EventType" class="form-select"><option>Run</option><option>Walk</option><option>Cycle</option></select></div>
+    </div>
+    <div class="mb-3"><label asp-for="Banner" class="form-label"></label>
+      @if (!string.IsNullOrEmpty(Model.BannerUrl)) { <div><img src="@Model.BannerUrl" class="banner-sm mb-2" alt="Current banner" /></div> }
+      <input asp-for="Banner" type="file" accept="image/jpeg,image/png,image/webp" class="form-control" /><span asp-validation-for="Banner" class="text-danger"></span></div>
+    <button class="btn btn-rd">Save event</button> <a class="btn btn-link" asp-action="Events">Cancel</a>
+  </form>
+</div></div>

@@ -1,0 +1,3 @@
+@model string
+@{ var cls = Model switch { "Confirmed" => "st-confirmed", "Pending" => "st-pending", "Cancelled" => "st-cancelled", _ => "st-pending" }; }
+<span class="status @cls">@Model</span>

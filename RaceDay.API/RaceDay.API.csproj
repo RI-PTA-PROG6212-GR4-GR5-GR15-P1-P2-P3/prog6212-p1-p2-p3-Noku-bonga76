@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -25,6 +25,12 @@
   <ItemGroup>
     <Folder Include="DTOs\" />
     <Folder Include="Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="RaceDay.API.Tests\**" />
+    <Content Remove="RaceDay.API.Tests\**" />
+    <EmbeddedResource Remove="RaceDay.API.Tests\**" />
+    <None Remove="RaceDay.API.Tests\**" />
   </ItemGroup>
 
 </Project>

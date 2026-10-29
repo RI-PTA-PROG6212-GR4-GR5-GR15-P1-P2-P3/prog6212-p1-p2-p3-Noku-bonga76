@@ -1,0 +1,16 @@
+@model List<EventDto>
+@{ ViewData["Title"] = "Upcoming Events"; }
+<div class="rd-hero mb-4"><h1 class="rd-h">Find your next finish line</h1><p>Runs, walks and rides across South Africa.</p></div>
+<form method="get" class="row g-2 mb-4">
+  <div class="col-md-4"><input name="search" value="@ViewBag.Search" class="form-control" placeholder="Search name or location" /></div>
+  <div class="col-md-3"><select name="type" class="form-select">
+    <option value="">All types</option>
+    @foreach (var t in new[] { "Run", "Walk", "Cycle" }) { <option value="@t" selected="@(ViewBag.Type == t)">@t</option> }
+  </select></div>
+  <div class="col-md-3"><input type="date" name="from" value="@ViewBag.From" class="form-control" /></div>
+  <div class="col-md-2"><button class="btn btn-rd w-100">Filter</button></div>
+</form>
+@if (!Model.Any()) { <p class="text-muted">No upcoming events match your filters.</p> }
+<div class="row g-4">
+  @foreach (var e in Model) { <div class="col-md-6 col-lg-4"><partial name="_EventCard" model="e" /></div> }
+</div>

@@ -1,0 +1,24 @@
+@model ResultsVm
+@{ ViewData["Title"] = "Results"; }
+<h2 class="rd-h">Results - @Model.Event.Name</h2>
+@if (Model.Event.EventDate.Date > DateTime.Today) { <div class="alert alert-warning">This event hasn't taken place yet. Results can be captured once it concludes.</div> }
+<div class="table-responsive"><table class="table rd-table align-middle">
+  <thead><tr><th>Participant</th><th>Category</th><th>Finish time (hh:mm:ss)</th><th>Position</th><th></th></tr></thead>
+  <tbody>
+  @foreach (var e in Model.Enrolments) {
+    var r = Model.Results.FirstOrDefault(x => x.EnrolmentId == e.Id);
+    <tr>
+      <td>@e.ParticipantName</td><td>@e.CategoryName</td>
+      <td><input form="f@(e.Id)" name="finishTime" value="@r?.FinishTime" class="form-control form-control-sm" placeholder="01:45:30" required /></td>
+      <td><input form="f@(e.Id)" name="position" type="number" min="1" value="@(r?.FinishingPosition)" class="form-control form-control-sm" required /></td>
+      <td>
+        <form id="f@(e.Id)" asp-action="SaveResult" asp-route-id="@Model.Event.Id" method="post">
+          <input type="hidden" name="enrolmentId" value="@e.Id" /><input type="hidden" name="resultId" value="@(r?.Id)" />
+          <button class="btn btn-sm btn-rd">@(r is null ? "Save" : "Update")</button>
+        </form>
+      </td>
+    </tr>
+  }
+  @if (!Model.Enrolments.Any()) { <tr><td colspan="5" class="text-muted">No enrolled participants.</td></tr> }
+  </tbody></table></div>
+<a class="btn btn-link" asp-action="Events">&larr; Back</a>

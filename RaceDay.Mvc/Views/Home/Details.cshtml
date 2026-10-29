@@ -1,0 +1,22 @@
+@model EventDetailVm
+@{ ViewData["Title"] = Model.Event.Name; var e = Model.Event; }
+@if (!string.IsNullOrEmpty(e.BannerUrl)) { <img src="@e.BannerUrl" class="banner-lg mb-3" alt="@e.Name banner" /> }
+else { <div class="banner-lg banner-placeholder mb-3">@e.EventType.ToUpper()</div> }
+<h1 class="rd-h">@e.Name</h1>
+<p><span class="badge bg-rd">@e.EventType</span> @e.EventDate.ToString("dddd, dd MMMM yyyy") &middot; @e.Location &middot; @e.Distance km</p>
+<p>@e.Description</p>
+<hr />
+<h4 class="rd-h">Categories</h4>
+@if (!Model.Categories.Any()) { <p class="text-muted">No categories have been set up yet.</p> }
+else if (Model.AlreadyEnrolled) { <div class="alert alert-info">You're already enrolled in this event. See <a asp-controller="Participant" asp-action="MyEnrolments">My Events</a>.</div> }
+else
+{
+  <form asp-action="Enrol" asp-route-id="@e.Id" method="post" class="row g-2" style="max-width:520px">
+    <div class="col-8"><select name="categoryId" class="form-select" required>
+      <option value="">Select a category...</option>
+      @foreach (var c in Model.Categories) { <option value="@c.Id">@c.CategoryName</option> }
+    </select></div>
+    <div class="col-4"><button class="btn btn-rd w-100">Enter Event</button></div>
+  </form>
+}
+<a class="btn btn-link mt-3" asp-action="Index">&larr; Back to events</a>
