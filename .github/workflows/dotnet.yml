@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,12 +20,17 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore API
-        run: dotnet restore RaceDay.API/RaceDay.API.csproj
+      # Part 2: API + unit tests
+      - name: Restore API tests
+        run: dotnet restore RaceDay.API/RaceDay.API.Tests/RaceDay.API.Tests.csproj
 
-      - name: Build API
-        run: dotnet build RaceDay.API/RaceDay.API.csproj --configuration Release --no-restore
+      - name: Build API and tests
+        run: dotnet build RaceDay.API/RaceDay.API.Tests/RaceDay.API.Tests.csproj --configuration Release --no-restore
 
+      - name: Run automated tests
+        run: dotnet test RaceDay.API/RaceDay.API.Tests/RaceDay.API.Tests.csproj --configuration Release --no-build --logger "console;verbosity=normal"
+
+      # Part 3: MVC app
       - name: Restore MVC
         run: dotnet restore RaceDay.Mvc/RaceDay.Mvc.csproj
 
