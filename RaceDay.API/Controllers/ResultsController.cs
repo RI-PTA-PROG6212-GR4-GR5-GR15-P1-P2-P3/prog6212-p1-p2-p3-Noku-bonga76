@@ -1,4 +1,5 @@
-﻿
+﻿using RaceDay.API.Services;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.API.Data;
@@ -23,6 +24,8 @@ public class ResultsController : ControllerBase
     public async Task<IActionResult> CreateResult(
         [FromBody] ResultDTO request)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
         if (request.EnrolmentID <= 0 ||
             request.FinishTime < TimeSpan.Zero ||
             request.FinishTime >= TimeSpan.FromDays(1) ||
@@ -85,6 +88,8 @@ public class ResultsController : ControllerBase
     public async Task<IActionResult> UpdateResult(
         [FromBody] ResultDTO request)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
         if (request.ResultID <= 0 ||
             request.EnrolmentID <= 0 ||
             request.FinishTime < TimeSpan.Zero ||
@@ -149,6 +154,12 @@ public class ResultsController : ControllerBase
     public async Task<IActionResult> GetMyResults(
         [FromQuery] int participantId)
     {
+        var denied = this.RequireRole("Participant");
+        if (denied != null) return denied;
+        if (HttpContext.GetSessionUserId() is int sessionUserId)
+        {
+            participantId = sessionUserId;
+        }
         if (participantId <= 0)
         {
             return BadRequest(new
@@ -167,7 +178,12 @@ public class ResultsController : ControllerBase
                 ResultID = result.ResultID,
                 EnrolmentID = result.EnrolmentID,
                 FinishTime = result.FinishTime,
-                FinishingPosition = result.FinishingPosition
+                FinishingPosition = result.FinishingPosition,
+                ParticipantName = _context.Users.Where(u => u.UserID == enrolment.ParticipantID).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault() ?? "",
+                EventName = _context.Events.Where(ev => ev.EventID == enrolment.EventID).Select(ev => ev.Name).FirstOrDefault() ?? "",
+                EventDate = _context.Events.Where(ev => ev.EventID == enrolment.EventID).Select(ev => ev.EventDate).FirstOrDefault(),
+                CategoryName = _context.Categories.Where(cat => cat.CategoryID == enrolment.CategoryID).Select(cat => cat.CategoryName).FirstOrDefault() ?? "",
+                TotalFinishers = _context.Results.Count(r2 => _context.Enrolments.Any(en2 => en2.EnrolmentID == r2.EnrolmentID && en2.EventID == enrolment.EventID))
             })
             .ToListAsync();
 
@@ -178,6 +194,8 @@ public class ResultsController : ControllerBase
     [HttpGet("/api/events/{eventId:int}/results")]
     public async Task<IActionResult> GetEventResults(int eventId)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
         var eventExists = await _context.Events
             .AnyAsync(e => e.EventID == eventId);
 
@@ -197,10 +215,21 @@ public class ResultsController : ControllerBase
                 ResultID = result.ResultID,
                 EnrolmentID = result.EnrolmentID,
                 FinishTime = result.FinishTime,
-                FinishingPosition = result.FinishingPosition
+                FinishingPosition = result.FinishingPosition,
+                ParticipantName = _context.Users.Where(u => u.UserID == enrolment.ParticipantID).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault() ?? "",
+                EventName = _context.Events.Where(ev => ev.EventID == enrolment.EventID).Select(ev => ev.Name).FirstOrDefault() ?? "",
+                EventDate = _context.Events.Where(ev => ev.EventID == enrolment.EventID).Select(ev => ev.EventDate).FirstOrDefault(),
+                CategoryName = _context.Categories.Where(cat => cat.CategoryID == enrolment.CategoryID).Select(cat => cat.CategoryName).FirstOrDefault() ?? "",
+                TotalFinishers = _context.Results.Count(r2 => _context.Enrolments.Any(en2 => en2.EnrolmentID == r2.EnrolmentID && en2.EventID == enrolment.EventID))
             })
             .ToListAsync();
 
         return Ok(results);
     }
 }
+
+
+
+
+
+

@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <Folder Include="DTOs\" />
-    <Folder Include="Services\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="RaceDay.API.Tests\**" />

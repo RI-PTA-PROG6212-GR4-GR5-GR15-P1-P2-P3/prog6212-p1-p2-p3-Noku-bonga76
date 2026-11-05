@@ -1,4 +1,5 @@
-﻿
+﻿using RaceDay.API.Services;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.API.Data;
@@ -22,6 +23,12 @@ public class EnrolmentsController : ControllerBase
     public async Task<IActionResult> CreateEnrolment(
         [FromBody] EnrolmentDTO request)
     {
+        var denied = this.RequireRole("Participant");
+        if (denied != null) return denied;
+        if (HttpContext.GetSessionUserId() is int sessionUserId)
+        {
+            request.ParticipantID = sessionUserId;
+        }
         var participantExists = await _context.Users
             .AnyAsync(u =>
                 u.UserID == request.ParticipantID &&
@@ -101,6 +108,12 @@ public class EnrolmentsController : ControllerBase
     public async Task<IActionResult> GetMyEnrolments(
         [FromQuery] int participantId)
     {
+        var denied = this.RequireRole("Participant");
+        if (denied != null) return denied;
+        if (HttpContext.GetSessionUserId() is int sessionUserId)
+        {
+            participantId = sessionUserId;
+        }
         if (participantId <= 0)
         {
             return BadRequest(new
@@ -119,7 +132,11 @@ public class EnrolmentsController : ControllerBase
                 EventID = e.EventID,
                 CategoryID = e.CategoryID,
                 EnrolmentDate = e.EnrolmentDate,
-                Status = e.Status
+                Status = e.Status,
+                EventName = _context.Events.Where(x => x.EventID == e.EventID).Select(x => x.Name).FirstOrDefault() ?? "",
+                EventDate = _context.Events.Where(x => x.EventID == e.EventID).Select(x => x.EventDate).FirstOrDefault(),
+                CategoryName = _context.Categories.Where(x => x.CategoryID == e.CategoryID).Select(x => x.CategoryName).FirstOrDefault() ?? "",
+                ParticipantName = _context.Users.Where(x => x.UserID == e.ParticipantID).Select(x => x.FirstName + " " + x.LastName).FirstOrDefault() ?? ""
             })
             .ToListAsync();
 
@@ -130,6 +147,8 @@ public class EnrolmentsController : ControllerBase
     [HttpGet("api/events/{eventId:int}/enrolments")]
     public async Task<IActionResult> GetEventEnrolments(int eventId)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
         var eventExists = await _context.Events
             .AnyAsync(e => e.EventID == eventId);
 
@@ -148,7 +167,11 @@ public class EnrolmentsController : ControllerBase
                 EventID = e.EventID,
                 CategoryID = e.CategoryID,
                 EnrolmentDate = e.EnrolmentDate,
-                Status = e.Status
+                Status = e.Status,
+                EventName = _context.Events.Where(x => x.EventID == e.EventID).Select(x => x.Name).FirstOrDefault() ?? "",
+                EventDate = _context.Events.Where(x => x.EventID == e.EventID).Select(x => x.EventDate).FirstOrDefault(),
+                CategoryName = _context.Categories.Where(x => x.CategoryID == e.CategoryID).Select(x => x.CategoryName).FirstOrDefault() ?? "",
+                ParticipantName = _context.Users.Where(x => x.UserID == e.ParticipantID).Select(x => x.FirstName + " " + x.LastName).FirstOrDefault() ?? ""
             })
             .ToListAsync();
 
@@ -159,6 +182,22 @@ public class EnrolmentsController : ControllerBase
     [HttpDelete("api/enrolments/{id:int}")]
     public async Task<IActionResult> CancelEnrolment(int id)
     {
+        var denied = this.RequireRole("Participant");
+        if (denied != null) return denied;
+        var sessionUserId = HttpContext.GetSessionUserId();
+        if (sessionUserId != null)
+        {
+            var ownerId = await _context.Enrolments
+                .Where(e => e.EnrolmentID == id)
+                .Select(e => (int?)e.ParticipantID)
+                .FirstOrDefaultAsync();
+
+            if (ownerId != null && ownerId != sessionUserId)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    new { message = "You can only cancel your own enrolments." });
+            }
+        }
         var enrolment = await _context.Enrolments
             .FirstOrDefaultAsync(e => e.EnrolmentID == id);
 
@@ -190,3 +229,9 @@ public class EnrolmentsController : ControllerBase
         });
     }
 }
+
+
+
+
+
+

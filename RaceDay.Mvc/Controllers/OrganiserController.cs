@@ -59,14 +59,14 @@ public class OrganiserController : Controller
         var res = await _api.Get<EventDto>($"api/events/{id}");
         if (!res.Ok || res.Data is null) { TempData["Error"] = res.Error; return RedirectToAction(nameof(Events)); }
         var e = res.Data;
-        return View("EventForm", new EventFormVm { Id = e.Id, Name = e.Name, Description = e.Description, EventDate = e.EventDate, Location = e.Location, Distance = e.Distance, EventType = e.EventType, BannerUrl = e.BannerUrl });
+        return View("EventForm", new EventFormVm { Id = e.Id, Name = e.Name, Description = e.Description ?? "", EventDate = e.EventDate, Location = e.Location, Distance = e.Distance, EventType = e.EventType, BannerUrl = e.BannerUrl });
     }
 
     [HttpPost]
     public async Task<IActionResult> EditEvent(EventFormVm vm)
     {
         if (!ModelState.IsValid || !BannerOk(vm)) return View("EventForm", vm);
-        var res = await _api.Put<EventDto>($"api/events/{vm.Id}", Payload(vm));
+        var res = await _api.Put<object>($"api/events/{vm.Id}", Payload(vm));
         if (!res.Ok) { ModelState.AddModelError("", res.Error ?? "Could not update event."); return View("EventForm", vm); }
         await UploadBanner(vm.Id, vm);
         TempData["Success"] = "Event updated.";
@@ -94,7 +94,7 @@ public class OrganiserController : Controller
     private async Task UploadBanner(int eventId, EventFormVm vm)
     {
         if (vm.Banner is not { Length: > 0 }) return;
-        var up = await _api.Upload<EventDto>($"api/events/{eventId}/banner", vm.Banner);
+        var up = await _api.Upload<object>($"api/events/{eventId}/banner", vm.Banner);
         if (!up.Ok) TempData["Error"] = "Event saved, but the banner upload failed: " + up.Error;
     }
 
@@ -152,8 +152,10 @@ public class OrganiserController : Controller
         if (!TimeSpan.TryParse(finishTime, out _) || position < 1)
         { TempData["Error"] = "Enter a valid finish time (hh:mm:ss) and a position of 1 or more."; return RedirectToAction(nameof(Results), new { id }); }
 
+        // API: POST api/results {EnrolmentID, FinishTime, FinishingPosition}
+        //      PUT  api/results  {ResultID, EnrolmentID, FinishTime, FinishingPosition}
         var res = resultId is > 0
-            ? await _api.Put<ResultDto>($"api/results/{resultId}", new { FinishTime = finishTime, FinishingPosition = position })
+            ? await _api.Put<ResultDto>("api/results", new { ResultID = resultId, EnrolmentID = enrolmentId, FinishTime = finishTime, FinishingPosition = position })
             : await _api.Post<ResultDto>("api/results", new { EnrolmentID = enrolmentId, FinishTime = finishTime, FinishingPosition = position });
         if (res.Ok) TempData["Success"] = "Result saved."; else TempData["Error"] = res.Error;
         return RedirectToAction(nameof(Results), new { id });

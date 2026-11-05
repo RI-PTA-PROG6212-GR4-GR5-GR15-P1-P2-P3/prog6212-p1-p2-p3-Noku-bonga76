@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using RaceDay.API.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.API.Data;
 using RaceDay.API.DTOs;
@@ -32,7 +33,8 @@ public class EventsController : ControllerBase
                 EventDate = e.EventDate,
                 Location = e.Location,
                 Distance = e.Distance,
-                EventType = e.EventType
+                EventType = e.EventType,
+                BannerUrl = e.EventImages.OrderByDescending(i => i.UploadedDate).Select(i => i.ImageURL).FirstOrDefault()
             })
             .ToListAsync();
 
@@ -55,7 +57,8 @@ public class EventsController : ControllerBase
                 EventDate = e.EventDate,
                 Location = e.Location,
                 Distance = e.Distance,
-                EventType = e.EventType
+                EventType = e.EventType,
+                BannerUrl = e.EventImages.OrderByDescending(i => i.UploadedDate).Select(i => i.ImageURL).FirstOrDefault()
             })
             .FirstOrDefaultAsync();
 
@@ -75,6 +78,12 @@ public class EventsController : ControllerBase
     public async Task<IActionResult> CreateEvent(
         [FromBody] EventDTO request)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
+        if (HttpContext.GetSessionUserId() is int sessionUserId)
+        {
+            request.OrganiserID = sessionUserId;
+        }
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -143,6 +152,22 @@ public class EventsController : ControllerBase
         int id,
         [FromBody] EventDTO request)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
+        var sessionUserId = HttpContext.GetSessionUserId();
+        if (sessionUserId != null)
+        {
+            var ownerId = await _context.Events
+                .Where(e => e.EventID == id)
+                .Select(e => (int?)e.OrganiserID)
+                .FirstOrDefaultAsync();
+
+            if (ownerId != null && ownerId != sessionUserId)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    new { message = "You can only change your own events." });
+            }
+        }
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -206,6 +231,22 @@ public class EventsController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteEvent(int id)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
+        var sessionUserId = HttpContext.GetSessionUserId();
+        if (sessionUserId != null)
+        {
+            var ownerId = await _context.Events
+                .Where(e => e.EventID == id)
+                .Select(e => (int?)e.OrganiserID)
+                .FirstOrDefaultAsync();
+
+            if (ownerId != null && ownerId != sessionUserId)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    new { message = "You can only change your own events." });
+            }
+        }
         var eventItem = await _context.Events
             .FirstOrDefaultAsync(e => e.EventID == id);
 
@@ -236,4 +277,58 @@ public class EventsController : ControllerBase
             message = "Event deleted successfully."
         });
     }
-}
+
+    // POST: api/events/5/banner
+    [HttpPost("{id:int}/banner")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadBanner(
+        int id,
+        [FromForm] ImageUploadRequest request,
+        [FromServices] IBlobStorageService blob)
+    {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
+
+        var eventItem = await _context.Events
+            .FirstOrDefaultAsync(e => e.EventID == id);
+
+        if (eventItem == null)
+        {
+            return NotFound(new { message = "Event not found." });
+        }
+
+        if (eventItem.OrganiserID != HttpContext.GetSessionUserId())
+        {
+            return StatusCode(StatusCodes.Status403Forbidden,
+                new { message = "You can only change banners for your own events." });
+        }
+
+        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+        var file = request.File;
+        if (file == null || file.Length == 0 ||
+            file.Length > 5_000_000 ||
+            !allowedTypes.Contains(file.ContentType))
+        {
+            return BadRequest(new
+            {
+                message = "Upload a JPG, PNG or WEBP image smaller than 5 MB."
+            });
+        }
+
+        var url = await blob.UploadAsync(file, "banners");
+
+        _context.Set<EventImage>().Add(new EventImage
+        {
+            EventID = id,
+            ImageURL = url,
+            UploadedDate = DateTime.UtcNow
+        });
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Banner uploaded.", bannerUrl = url });
+    }}
+
+
+
+
+

@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 namespace RaceDay.Mvc.Models;
 
 public class UserDto
 {
-    public int Id { get; set; }
+    [JsonPropertyName("userID")] public int Id { get; set; }
     public string FirstName { get; set; } = "";
     public string LastName { get; set; } = "";
     public string Email { get; set; } = "";
@@ -12,51 +13,58 @@ public class UserDto
     public string? ProfilePictureUrl { get; set; }
 }
 
+/// <summary>The API's login reply is { message, user: {...} }.</summary>
+public class LoginResponse
+{
+    public string? Message { get; set; }
+    public UserDto? User { get; set; }
+}
+
 public class EventDto
 {
-    public int Id { get; set; }
+    [JsonPropertyName("eventID")] public int Id { get; set; }
+    [JsonPropertyName("organiserID")] public int? OrganiserId { get; set; }
     public string Name { get; set; } = "";
-    public string Description { get; set; } = "";
+    public string? Description { get; set; }
     public DateTime EventDate { get; set; }
     public string Location { get; set; } = "";
     public double Distance { get; set; }
     public string EventType { get; set; } = "Run";
     public string? BannerUrl { get; set; }
-    public int? OrganiserId { get; set; }
-    public int EnrolmentCount { get; set; }
+    public int EnrolmentCount { get; set; }   // filled in by the MVC dashboard
 }
 
 public class CategoryDto
 {
-    public int Id { get; set; }
-    public int EventId { get; set; }
+    [JsonPropertyName("categoryID")] public int Id { get; set; }
+    [JsonPropertyName("eventID")] public int EventId { get; set; }
     public string CategoryName { get; set; } = "";
     public string? Description { get; set; }
 }
 
 public class EnrolmentDto
 {
-    public int Id { get; set; }
-    public int EventId { get; set; }
+    [JsonPropertyName("enrolmentID")] public int Id { get; set; }
+    [JsonPropertyName("eventID")] public int EventId { get; set; }
+    [JsonPropertyName("categoryID")] public int CategoryId { get; set; }
+    [JsonPropertyName("participantID")] public int ParticipantId { get; set; }
     public string EventName { get; set; } = "";
     public DateTime EventDate { get; set; }
-    public int CategoryId { get; set; }
     public string CategoryName { get; set; } = "";
-    public int ParticipantId { get; set; }
     public string ParticipantName { get; set; } = "";
     public string Status { get; set; } = "Pending";
 }
 
 public class ResultDto
 {
-    public int Id { get; set; }
-    public int EnrolmentId { get; set; }
+    [JsonPropertyName("resultID")] public int Id { get; set; }
+    [JsonPropertyName("enrolmentID")] public int EnrolmentId { get; set; }
+    public string FinishTime { get; set; } = "";
+    public int FinishingPosition { get; set; }
     public string ParticipantName { get; set; } = "";
     public string EventName { get; set; } = "";
     public DateTime EventDate { get; set; }
     public string CategoryName { get; set; } = "";
-    public string FinishTime { get; set; } = "";
-    public int FinishingPosition { get; set; }
     public int TotalFinishers { get; set; }
 }
 

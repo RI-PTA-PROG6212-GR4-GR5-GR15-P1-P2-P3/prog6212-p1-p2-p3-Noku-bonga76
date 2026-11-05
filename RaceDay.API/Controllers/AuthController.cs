@@ -88,7 +88,8 @@ public class AuthController : ControllerBase
             LastName = user.LastName,
             Email = user.Email,
             Role = user.Role,
-            Phone = user.Phone
+            Phone = user.Phone,
+            ProfilePictureUrl = user.ProfilePictureUrl
         };
 
         return CreatedAtAction(
@@ -131,6 +132,8 @@ public class AuthController : ControllerBase
             });
         }
 
+        HttpContext.StartSession(user.UserID, user.Role);
+
         var response = new UserProfileDTO
         {
             UserID = user.UserID,
@@ -138,7 +141,8 @@ public class AuthController : ControllerBase
             LastName = user.LastName,
             Email = user.Email,
             Role = user.Role,
-            Phone = user.Phone
+            Phone = user.Phone,
+            ProfilePictureUrl = user.ProfilePictureUrl
         };
 
         return Ok(new
@@ -152,9 +156,12 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
+        HttpContext.EndSession();
         return Ok(new
         {
             message = "Logout endpoint reached successfully."
         });
     }
 }
+
+
