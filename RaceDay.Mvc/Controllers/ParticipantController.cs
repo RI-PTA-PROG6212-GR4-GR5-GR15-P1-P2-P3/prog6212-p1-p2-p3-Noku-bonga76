@@ -46,14 +46,14 @@ public class ParticipantController : Controller
     public async Task<IActionResult> Profile(ProfileVm vm)
     {
         if (!ModelState.IsValid) return View(vm);
-        var upd = await _api.Put<UserDto>("api/users/profile", new { vm.FirstName, vm.LastName, vm.Email, vm.Phone });
+        var upd = await _api.Put<object>("api/users/profile", new { vm.FirstName, vm.LastName, vm.Email, vm.Phone });
         if (!upd.Ok) { ModelState.AddModelError("", upd.Error ?? "Update failed."); return View(vm); }
 
         if (vm.Picture is { Length: > 0 })
         {
             if (vm.Picture.Length > 5_000_000 || !vm.Picture.ContentType.StartsWith("image/"))
             { ModelState.AddModelError("", "Please upload an image smaller than 5 MB."); return View(vm); }
-            var up = await _api.Upload<UserDto>("api/users/profile/picture", vm.Picture);
+            var up = await _api.Upload<object>("api/users/profile/picture", vm.Picture);
             if (!up.Ok) { ModelState.AddModelError("", up.Error ?? "Picture upload failed."); return View(vm); }
         }
         HttpContext.Session.SetString("Name", vm.FirstName);

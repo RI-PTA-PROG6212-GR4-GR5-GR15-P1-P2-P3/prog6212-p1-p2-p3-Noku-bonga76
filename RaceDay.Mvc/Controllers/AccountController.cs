@@ -15,15 +15,15 @@ public class AccountController : Controller
     public async Task<IActionResult> Login(LoginVm vm)
     {
         if (!ModelState.IsValid) return View(vm);
-        var res = await _api.Post<UserDto>("api/auth/login", new { vm.Email, vm.Password });
-        if (!res.Ok || res.Data is null)
+        var res = await _api.Post<LoginResponse>("api/auth/login", new { vm.Email, vm.Password });
+        if (!res.Ok || res.Data?.User is null)
         {
             ModelState.AddModelError("", res.Error ?? "Login failed.");
             return View(vm);
         }
-        HttpContext.Session.SetInt32("UserId", res.Data.Id);
-        HttpContext.Session.SetString("Role", res.Data.Role);
-        HttpContext.Session.SetString("Name", res.Data.FirstName);
+        HttpContext.Session.SetInt32("UserId", res.Data.User.Id);
+        HttpContext.Session.SetString("Role", res.Data.User.Role);
+        HttpContext.Session.SetString("Name", res.Data.User.FirstName);
         return RedirectToAction("Index", "Home");
     }
 
