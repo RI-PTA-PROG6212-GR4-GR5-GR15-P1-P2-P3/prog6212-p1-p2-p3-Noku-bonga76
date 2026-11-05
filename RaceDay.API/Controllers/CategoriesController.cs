@@ -1,4 +1,5 @@
-﻿
+﻿using RaceDay.API.Services;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.API.Data;
@@ -50,6 +51,8 @@ public class CategoriesController : ControllerBase
         int eventId,
         [FromBody] CategoryDTO request)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
         if (string.IsNullOrWhiteSpace(request.CategoryName))
         {
             return BadRequest(new
@@ -95,6 +98,8 @@ public class CategoriesController : ControllerBase
         int id,
         [FromBody] CategoryDTO request)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
         if (string.IsNullOrWhiteSpace(request.CategoryName))
         {
             return BadRequest(new
@@ -129,6 +134,8 @@ public class CategoriesController : ControllerBase
     [HttpDelete("api/categories/{id:int}")]
     public async Task<IActionResult> DeleteCategory(int id)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
         var category = await _context.Categories
             .FirstOrDefaultAsync(c => c.CategoryID == id);
 
@@ -154,3 +161,7 @@ public class CategoriesController : ControllerBase
         return Ok(new { message = "Category deleted successfully." });
     }
 }
+
+
+
+

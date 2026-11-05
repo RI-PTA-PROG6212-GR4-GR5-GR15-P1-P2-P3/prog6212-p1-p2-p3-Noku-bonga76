@@ -78,6 +78,12 @@ public class EventsController : ControllerBase
     public async Task<IActionResult> CreateEvent(
         [FromBody] EventDTO request)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
+        if (HttpContext.GetSessionUserId() is int sessionUserId)
+        {
+            request.OrganiserID = sessionUserId;
+        }
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -146,6 +152,22 @@ public class EventsController : ControllerBase
         int id,
         [FromBody] EventDTO request)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
+        var sessionUserId = HttpContext.GetSessionUserId();
+        if (sessionUserId != null)
+        {
+            var ownerId = await _context.Events
+                .Where(e => e.EventID == id)
+                .Select(e => (int?)e.OrganiserID)
+                .FirstOrDefaultAsync();
+
+            if (ownerId != null && ownerId != sessionUserId)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    new { message = "You can only change your own events." });
+            }
+        }
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -209,6 +231,22 @@ public class EventsController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteEvent(int id)
     {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
+        var sessionUserId = HttpContext.GetSessionUserId();
+        if (sessionUserId != null)
+        {
+            var ownerId = await _context.Events
+                .Where(e => e.EventID == id)
+                .Select(e => (int?)e.OrganiserID)
+                .FirstOrDefaultAsync();
+
+            if (ownerId != null && ownerId != sessionUserId)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    new { message = "You can only change your own events." });
+            }
+        }
         var eventItem = await _context.Events
             .FirstOrDefaultAsync(e => e.EventID == id);
 
@@ -289,5 +327,8 @@ public class EventsController : ControllerBase
 
         return Ok(new { message = "Banner uploaded.", bannerUrl = url });
     }}
+
+
+
 
 

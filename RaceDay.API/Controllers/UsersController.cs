@@ -24,6 +24,13 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> GetProfile(
         [FromQuery] int userId)
     {
+        var denied = this.RequireRole("Participant", "Organiser");
+        if (denied != null) return denied;
+
+        if (HttpContext.GetSessionUserId() is int sessionUserId)
+        {
+            userId = sessionUserId;
+        }
         if (userId <= 0)
         {
             return BadRequest(new
@@ -64,6 +71,13 @@ public class UsersController : ControllerBase
         [FromQuery] int userId,
         [FromBody] UserProfileDTO request)
     {
+        var denied = this.RequireRole("Participant", "Organiser");
+        if (denied != null) return denied;
+
+        if (HttpContext.GetSessionUserId() is int sessionUserId)
+        {
+            userId = sessionUserId;
+        }
         if (userId <= 0)
         {
             return BadRequest(new
@@ -177,5 +191,7 @@ public class UsersController : ControllerBase
             profilePictureUrl = user.ProfilePictureUrl
         });
     }}
+
+
 
 

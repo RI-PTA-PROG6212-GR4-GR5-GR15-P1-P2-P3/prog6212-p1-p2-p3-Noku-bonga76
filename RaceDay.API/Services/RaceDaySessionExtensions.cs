@@ -31,6 +31,8 @@ public static class RaceDaySessionExtensions
     /// <summary>Returns null when allowed, otherwise a 401 (not logged in) or 403 (wrong role).</summary>
     public static IActionResult? RequireRole(this ControllerBase controller, params string[] roles)
     {
+        if (controller.HttpContext is null) return null;
+
         if (controller.HttpContext.GetSessionUserId() is null)
             return controller.Unauthorized(new { message = "Please log in to continue." });
 
@@ -42,3 +44,4 @@ public static class RaceDaySessionExtensions
         return null;
     }
 }
+
