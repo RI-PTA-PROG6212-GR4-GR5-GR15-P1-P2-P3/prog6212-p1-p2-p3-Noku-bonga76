@@ -11,6 +11,8 @@ builder.Services.AddDbContext<RaceDayContext>(options =>
         builder.Configuration.GetConnectionString("RaceDayConnection")));
 
 builder.Services.AddSingleton<IBlobStorageService, BlobStorageService>();
+builder.Services.AddScoped<IPasswordService, PasswordService>();
+
 
 // Server-side session: stores the logged-in user's ID and role.
 builder.Services.AddDistributedMemoryCache();

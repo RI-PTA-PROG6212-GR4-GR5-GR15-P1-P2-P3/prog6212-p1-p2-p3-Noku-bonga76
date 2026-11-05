@@ -245,7 +245,7 @@ public class EventsController : ControllerBase
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> UploadBanner(
         int id,
-        [FromForm] IFormFile file,
+        [FromForm] ImageUploadRequest request,
         [FromServices] IBlobStorageService blob)
     {
         var denied = this.RequireRole("Organiser");
@@ -266,6 +266,7 @@ public class EventsController : ControllerBase
         }
 
         var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+        var file = request.File;
         if (file == null || file.Length == 0 ||
             file.Length > 5_000_000 ||
             !allowedTypes.Contains(file.ContentType))
@@ -288,4 +289,5 @@ public class EventsController : ControllerBase
 
         return Ok(new { message = "Banner uploaded.", bannerUrl = url });
     }}
+
 

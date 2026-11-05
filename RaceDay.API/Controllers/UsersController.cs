@@ -142,13 +142,14 @@ public class UsersController : ControllerBase
     [HttpPost("profile/picture")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> UploadProfilePicture(
-        [FromForm] IFormFile file,
+        [FromForm] ImageUploadRequest request,
         [FromServices] IBlobStorageService blob)
     {
         var denied = this.RequireRole("Participant", "Organiser");
         if (denied != null) return denied;
 
         var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+        var file = request.File;
         if (file == null || file.Length == 0 ||
             file.Length > 5_000_000 ||
             !allowedTypes.Contains(file.ContentType))
@@ -176,4 +177,5 @@ public class UsersController : ControllerBase
             profilePictureUrl = user.ProfilePictureUrl
         });
     }}
+
 
