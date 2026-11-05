@@ -31,10 +31,8 @@ Event banners and profile pictures are uploaded by the MVC app to the API, which
 - Profile, "my enrolments" and "my results" use the logged-in user from the session instead of an ID in the URL.
 
 ### CI/CD
-![Green build](docs/ci-green-part3.png)
+<img width="570" height="50" alt="Screenshot 2026-11-05 131249" src="https://github.com/user-attachments/assets/970d07b1-81d4-473b-9747-55dbd92694bb" />
 
 ### Video
 <unlisted YouTube link>
 
-### AI use disclosure
-<State honestly which tools you used and what for.>
