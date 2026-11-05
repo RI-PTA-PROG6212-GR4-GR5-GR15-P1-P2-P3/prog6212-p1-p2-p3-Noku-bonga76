@@ -1,4 +1,5 @@
-﻿
+﻿using RaceDay.API.Services;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.API.Data;
@@ -50,7 +51,8 @@ public class UsersController : ControllerBase
             LastName = user.LastName,
             Email = user.Email,
             Role = user.Role,
-            Phone = user.Phone
+            Phone = user.Phone,
+            ProfilePictureUrl = user.ProfilePictureUrl
         };
 
         return Ok(response);
@@ -125,7 +127,8 @@ public class UsersController : ControllerBase
             LastName = user.LastName,
             Email = user.Email,
             Role = user.Role,
-            Phone = user.Phone
+            Phone = user.Phone,
+            ProfilePictureUrl = user.ProfilePictureUrl
         };
 
         return Ok(new
@@ -134,4 +137,43 @@ public class UsersController : ControllerBase
             user = response
         });
     }
-}
+
+    // POST: api/users/profile/picture
+    [HttpPost("profile/picture")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadProfilePicture(
+        [FromForm] IFormFile file,
+        [FromServices] IBlobStorageService blob)
+    {
+        var denied = this.RequireRole("Participant", "Organiser");
+        if (denied != null) return denied;
+
+        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+        if (file == null || file.Length == 0 ||
+            file.Length > 5_000_000 ||
+            !allowedTypes.Contains(file.ContentType))
+        {
+            return BadRequest(new
+            {
+                message = "Upload a JPG, PNG or WEBP image smaller than 5 MB."
+            });
+        }
+
+        var userId = HttpContext.GetSessionUserId()!.Value;
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserID == userId);
+
+        if (user == null)
+        {
+            return NotFound(new { message = "User profile not found." });
+        }
+
+        user.ProfilePictureUrl = await blob.UploadAsync(file, "profiles");
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = "Profile picture updated.",
+            profilePictureUrl = user.ProfilePictureUrl
+        });
+    }}
+

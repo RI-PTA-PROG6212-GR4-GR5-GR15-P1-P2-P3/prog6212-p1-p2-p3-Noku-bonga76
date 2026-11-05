@@ -14,4 +14,6 @@ public class UserProfileDTO
     public string Role { get; set; } = string.Empty;
 
     public string? Phone { get; set; }
+    public string? ProfilePictureUrl { get; set; }
 }
+

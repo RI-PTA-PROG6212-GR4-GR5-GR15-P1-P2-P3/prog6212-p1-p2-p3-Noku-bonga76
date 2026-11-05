@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using RaceDay.API.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.API.Data;
 using RaceDay.API.DTOs;
@@ -32,7 +33,8 @@ public class EventsController : ControllerBase
                 EventDate = e.EventDate,
                 Location = e.Location,
                 Distance = e.Distance,
-                EventType = e.EventType
+                EventType = e.EventType,
+                BannerUrl = e.EventImages.OrderByDescending(i => i.UploadedDate).Select(i => i.ImageURL).FirstOrDefault()
             })
             .ToListAsync();
 
@@ -55,7 +57,8 @@ public class EventsController : ControllerBase
                 EventDate = e.EventDate,
                 Location = e.Location,
                 Distance = e.Distance,
-                EventType = e.EventType
+                EventType = e.EventType,
+                BannerUrl = e.EventImages.OrderByDescending(i => i.UploadedDate).Select(i => i.ImageURL).FirstOrDefault()
             })
             .FirstOrDefaultAsync();
 
@@ -236,4 +239,53 @@ public class EventsController : ControllerBase
             message = "Event deleted successfully."
         });
     }
-}
+
+    // POST: api/events/5/banner
+    [HttpPost("{id:int}/banner")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadBanner(
+        int id,
+        [FromForm] IFormFile file,
+        [FromServices] IBlobStorageService blob)
+    {
+        var denied = this.RequireRole("Organiser");
+        if (denied != null) return denied;
+
+        var eventItem = await _context.Events
+            .FirstOrDefaultAsync(e => e.EventID == id);
+
+        if (eventItem == null)
+        {
+            return NotFound(new { message = "Event not found." });
+        }
+
+        if (eventItem.OrganiserID != HttpContext.GetSessionUserId())
+        {
+            return StatusCode(StatusCodes.Status403Forbidden,
+                new { message = "You can only change banners for your own events." });
+        }
+
+        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+        if (file == null || file.Length == 0 ||
+            file.Length > 5_000_000 ||
+            !allowedTypes.Contains(file.ContentType))
+        {
+            return BadRequest(new
+            {
+                message = "Upload a JPG, PNG or WEBP image smaller than 5 MB."
+            });
+        }
+
+        var url = await blob.UploadAsync(file, "banners");
+
+        _context.Set<EventImage>().Add(new EventImage
+        {
+            EventID = id,
+            ImageURL = url,
+            UploadedDate = DateTime.UtcNow
+        });
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Banner uploaded.", bannerUrl = url });
+    }}
+
